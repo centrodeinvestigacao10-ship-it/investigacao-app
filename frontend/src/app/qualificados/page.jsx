@@ -8,7 +8,6 @@ import { DetailPanel } from "@/components/DetailPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
 import { listQualificados } from "@/lib/repositories/qualificados";
-import { qualificadosMock } from "@/lib/qualificadosMock";
 import {
   createQualificado,
   removeQualificado,
@@ -56,8 +55,8 @@ export default function QualificadosPage() {
 
       if (!isSupabaseConfigured) {
         if (mounted) {
-          setItems(qualificadosMock);
-          setStatus("mock");
+          setItems([]);
+          setStatus("not_configured");
         }
         return;
       }
@@ -69,8 +68,9 @@ export default function QualificadosPage() {
           setStatus("ready");
         }
       } catch (error) {
+        console.error("Erro ao carregar qualificados:", error);
         if (mounted) {
-          setItems(qualificadosMock);
+          setItems([]);
           setStatus("error");
         }
       }
@@ -121,6 +121,18 @@ export default function QualificadosPage() {
 
   return (
     <div className="space-y-6">
+      {!isSupabaseConfigured && (
+        <div className="rounded-lg bg-red-50 border-2 border-red-200 p-4">
+          <p className="text-sm font-semibold text-red-800">
+            ⚠️ ATENÇÃO: Sistema em modo offline
+          </p>
+          <p className="text-xs text-red-600 mt-1">
+            As variáveis de ambiente do Supabase não estão configuradas. 
+            Operações de criar/editar/excluir estão desabilitadas.
+          </p>
+        </div>
+      )}
+      
       <PageHeader
         title="Qualificados"
         description="Cadastre, edite, remova e vincule qualificados."
@@ -150,8 +162,12 @@ export default function QualificadosPage() {
                 label: "Fonte",
                 value:
                   status === "ready"
-                    ? "Supabase conectado."
-                    : "Mock local (configure o Supabase)."
+                    ? "✅ Supabase conectado"
+                    : status === "not_configured"
+                    ? "❌ Supabase não configurado"
+                    : status === "error"
+                    ? "⚠️ Erro ao conectar"
+                    : "Carregando..."
               },
               { label: "Vínculos", value: "3 alvos conectados." },
               { label: "Alertas", value: "1 pendência de revisão." }

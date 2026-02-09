@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { alvosMock } from "@/lib/mockData";
 import {
   createAlvo,
   listAlvos,
@@ -51,8 +50,8 @@ export default function AlvosPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(alvosMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -61,7 +60,8 @@ export default function AlvosPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(alvosMock);
+      console.error("Erro ao carregar alvos:", error);
+      setItems([]);
       setStatus("error");
     }
   }
@@ -106,6 +106,18 @@ export default function AlvosPage() {
 
   return (
     <div className="space-y-6">
+      {!isSupabaseConfigured && (
+        <div className="rounded-lg bg-red-50 border-2 border-red-200 p-4">
+          <p className="text-sm font-semibold text-red-800">
+            ⚠️ ATENÇÃO: Sistema em modo offline
+          </p>
+          <p className="text-xs text-red-600 mt-1">
+            As variáveis de ambiente do Supabase não estão configuradas. 
+            Operações de criar/editar/excluir estão desabilitadas.
+          </p>
+        </div>
+      )}
+      
       <PageHeader
         title="Alvos e Conexões"
         description="Gerencie alvos, vínculos e eventos em um só fluxo."
@@ -140,8 +152,12 @@ export default function AlvosPage() {
                 label: "Fonte",
                 value:
                   status === "ready"
-                    ? "Supabase conectado."
-                    : "Mock local (configure o Supabase)."
+                    ? "✅ Supabase conectado"
+                    : status === "not_configured"
+                    ? "❌ Supabase não configurado"
+                    : status === "error"
+                    ? "⚠️ Erro ao conectar"
+                    : "Carregando..."
               },
               { label: "Registros", value: `${items.length} alvos` }
             ]}

@@ -7,7 +7,6 @@ import { TimelinePanel } from "@/components/TimelinePanel";
 import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
-import { conexoesMock } from "@/lib/mockData";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
 import {
   createConexao,
@@ -85,8 +84,8 @@ export default function ConexoesPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(conexoesMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -95,7 +94,8 @@ export default function ConexoesPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(conexoesMock);
+      console.error("Erro ao carregar conexoes:", error);
+      setItems([]);
       setStatus("error");
     }
   }

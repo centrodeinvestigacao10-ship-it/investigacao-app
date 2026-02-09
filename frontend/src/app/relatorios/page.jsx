@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { relatoriosMock } from "@/lib/mockData";
 import {
   createRelatorio,
   listRelatorios,
@@ -44,8 +43,8 @@ export default function RelatoriosPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(relatoriosMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -54,7 +53,8 @@ export default function RelatoriosPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(relatoriosMock);
+      console.error("Erro ao carregar relatorios:", error);
+      setItems([]);
       setStatus("error");
     }
   }

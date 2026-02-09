@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { erbsMock } from "@/lib/mockData";
 import { parseCsvWithHeaders } from "@/lib/csv";
 import { CsvMapper } from "@/components/CsvMapper";
 import {
@@ -54,8 +53,8 @@ export default function ErbsPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(erbsMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -64,7 +63,8 @@ export default function ErbsPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(erbsMock);
+      console.error("Erro ao carregar ERBs:", error);
+      setItems([]);
       setStatus("error");
     }
   }

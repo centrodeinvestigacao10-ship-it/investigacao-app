@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { extratosMock } from "@/lib/mockData";
 import { parseCsvWithHeaders } from "@/lib/csv";
 import { CsvMapper } from "@/components/CsvMapper";
 import {
@@ -56,8 +55,8 @@ export default function ExtratosPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(extratosMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -66,7 +65,8 @@ export default function ExtratosPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(extratosMock);
+      console.error("Erro ao carregar extratos:", error);
+      setItems([]);
       setStatus("error");
     }
   }

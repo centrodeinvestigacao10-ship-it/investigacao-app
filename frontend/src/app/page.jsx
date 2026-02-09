@@ -1,9 +1,60 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { QuickActions } from "@/components/QuickActions";
 import { SectionCard } from "@/components/SectionCard";
+import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 
 export default function HomePage() {
+  const [metrics, setMetrics] = useState({
+    operacoes: 0,
+    alvos: 0,
+    analises: 0,
+    loading: true
+  });
+
+  useEffect(() => {
+    async function loadMetrics() {
+      if (!isSupabaseConfigured) {
+        setMetrics({ operacoes: 0, alvos: 0, analises: 0, loading: false });
+        return;
+      }
+
+      try {
+        const [opResult, alvosResult, analisesResult] = await Promise.all([
+          supabase.from("operacoes").select("*", { count: "exact", head: true }),
+          supabase.from("alvos").select("*", { count: "exact", head: true }),
+          supabase.from("analises").select("*", { count: "exact", head: true })
+        ]);
+
+        setMetrics({
+          operacoes: opResult.count ?? 0,
+          alvos: alvosResult.count ?? 0,
+          analises: analisesResult.count ?? 0,
+          loading: false
+        });
+      } catch (error) {
+        console.error("Erro ao carregar métricas:", error);
+        setMetrics({ operacoes: 0, alvos: 0, analises: 0, loading: false });
+      }
+    }
+
+    loadMetrics();
+  }, []);
+
   return (
     <div className="space-y-6">
+      {!isSupabaseConfigured && (
+        <div className="rounded-lg bg-red-50 border-2 border-red-200 p-4">
+          <p className="text-sm font-semibold text-red-800">
+            ⚠️ ATENÇÃO: Sistema em modo offline
+          </p>
+          <p className="text-xs text-red-600 mt-1">
+            Configure as variáveis de ambiente do Supabase no Vercel para habilitar todas as funcionalidades.
+          </p>
+        </div>
+      )}
+      
       <section className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -14,16 +65,22 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs md:grid-cols-3">
             <div className="rounded-xl bg-white/10 px-3 py-2">
-              <p className="text-slate-300">Casos ativos</p>
-              <p className="text-lg font-semibold">12</p>
+              <p className="text-slate-300">Operações</p>
+              <p className="text-lg font-semibold">
+                {metrics.loading ? "..." : metrics.operacoes}
+              </p>
             </div>
             <div className="rounded-xl bg-white/10 px-3 py-2">
-              <p className="text-slate-300">Alvos em foco</p>
-              <p className="text-lg font-semibold">27</p>
+              <p className="text-slate-300">Alvos</p>
+              <p className="text-lg font-semibold">
+                {metrics.loading ? "..." : metrics.alvos}
+              </p>
             </div>
             <div className="rounded-xl bg-white/10 px-3 py-2">
-              <p className="text-slate-300">Alertas</p>
-              <p className="text-lg font-semibold">5</p>
+              <p className="text-slate-300">Análises</p>
+              <p className="text-lg font-semibold">
+                {metrics.loading ? "..." : metrics.analises}
+              </p>
             </div>
           </div>
         </div>

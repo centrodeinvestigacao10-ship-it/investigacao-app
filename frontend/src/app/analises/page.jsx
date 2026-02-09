@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { analisesMock } from "@/lib/mockData";
 import {
   createAnalise,
   listAnalises,
@@ -47,8 +46,8 @@ export default function AnalisesPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(analisesMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -57,7 +56,8 @@ export default function AnalisesPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(analisesMock);
+      console.error("Erro ao carregar analises:", error);
+      setItems([]);
       setStatus("error");
     }
   }

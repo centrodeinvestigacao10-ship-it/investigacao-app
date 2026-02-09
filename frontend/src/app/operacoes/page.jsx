@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { EntityList } from "@/components/EntityList";
 import { DetailPanel } from "@/components/DetailPanel";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { operacoesMock } from "@/lib/mockData";
 import {
   createOperacao,
   listOperacoes,
@@ -45,8 +44,8 @@ export default function OperacoesPage() {
   async function load() {
     setStatus("loading");
     if (!isSupabaseConfigured) {
-      setItems(operacoesMock);
-      setStatus("mock");
+      setItems([]);
+      setStatus("not_configured");
       return;
     }
 
@@ -55,7 +54,8 @@ export default function OperacoesPage() {
       setItems(data);
       setStatus("ready");
     } catch (error) {
-      setItems(operacoesMock);
+      console.error("Erro ao carregar operacoes:", error);
+      setItems([]);
       setStatus("error");
     }
   }
